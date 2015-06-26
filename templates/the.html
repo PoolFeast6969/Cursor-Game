@@ -3,9 +3,9 @@
 
 	<head>
 		{% load staticfiles %}
-		<link rel="stylesheet" href="{% static " the.css " %}" />
-		<script src="{% static " jquery-1.11.1.min.js " %}"></script>
-		<script src="{% static " omnibus.min.js " %}"></script>
+		<link rel="stylesheet" href="{% static "the.css" %}" />
+		<script src="{% static "jquery-1.11.1.min.js" %}"></script>
+		<script src="{% static "omnibus.min.js" %}"></script>
 	</head>
 
 	<body>
@@ -13,24 +13,20 @@
 			(function() {
 				// Initialize connection:
 				var players = {};
-				var transport = WebSocket; //SockJS
+				var transport = WebSocket;
 				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
-				var options = {
-					authToken: '{{ OMNIBUS_AUTH_TOKEN }}'
-				};
+				var options = {authToken: '{{ OMNIBUS_AUTH_TOKEN }}'};
 				var connection = new Omnibus(transport, endpoint, options);
 				var channel = connection.openChannel('mousemoves');
-				// Add events on connection:
+
 				connection.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
 					$('.connection').addClass('open').text('Yes');
 				}).on(Omnibus.events.CONNECTION_AUTHENTICATED, function(event) {
 					$('.identification').addClass('open').text('Yes');
 				});
-				// Add events on channel:
 				channel.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
 					$('.channel').addClass('open').text('Yes');
 				}).on('move', function(event) {
-					// handle mouse moves form other users...
 					var player = players[event.data.sender];
 					if (player === undefined) {
 						player = $('<div class="player" />').appendTo($('body'));
@@ -48,7 +44,7 @@
 						delete(players[event.data.sender]);
 					}
 				});
-				// Add mouse move event on window to send own mouse moves:
+
 				$('body').mousemove(function(e) {
 					channel.send('move', {
 						top: e.pageY,
@@ -56,7 +52,6 @@
 					});
 				});
 			})();
-
 		</script>
 		<dl>
 			<dt>Connected</dt>
