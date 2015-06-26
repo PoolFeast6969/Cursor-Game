@@ -1,49 +1,10 @@
 html, body {
 	height: 100%;
 }
-
 body {
 	font-family: Verdana, Arial, sans-serif;
 	background: #45484d;
 }
-
-dl {
-	position: absolute;
-	overflow: hidden;
-	z-index: 10;
-	top: 0;
-	left: 0;
-	margin: 0;
-	padding: 5px 5px 0 5px;
-	width: 170px;
-	line-height: 20px;
-	color: #ffffff;
-	font-size: 10px;
-	background: #000000;
-	background: rgba(0, 0, 0, 0.5);
-}
-
-dt {
-	float: left;
-	margin: 0 0 5px 0;
-	width: 150px;
-	height: 20px;
-}
-
-dd {
-	overflow: hidden;
-	float: left;
-	margin: 0 0 5px 0;
-	width: 20px;
-	height: 20px;
-	text-indent: -999px;
-	background: #ff0000;
-}
-
-dd.open {
-	background: #00ff00;
-}
-
 .player {
 	position: absolute;
 	width: 10px;

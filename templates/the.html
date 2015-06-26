@@ -10,57 +10,63 @@
 
 	<body>
 		<script type="text/javascript">
-			(function() {
-				// Initialize connection:
-				var players = {};
-				var transport = WebSocket;
-				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
-				var options = {authToken: '{{ OMNIBUS_AUTH_TOKEN }}'};
-				var connection = new Omnibus(transport, endpoint, options);
-				var channel = connection.openChannel('mousemoves');
+		(function() {
+			var players = {};
+			var transport = WebSocket;
+			var endpoint = '{{ OMNIBUS_ENDPOINT }}';
+			var options = {authToken: '{{ OMNIBUS_AUTH_TOKEN }}'};
+			var connection = new Omnibus(transport, endpoint, options);
+			var channel = connection.openChannel('mousemoves');
+			var ip = '{{ request.session.ip }}'
 
-				connection.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
-					$('.connection').addClass('open').text('Yes');
-				}).on(Omnibus.events.CONNECTION_AUTHENTICATED, function(event) {
-					$('.identification').addClass('open').text('Yes');
+			connection
+				.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
+					console.log('Connection Created');
+				})
+				.on(Omnibus.events.CONNECTION_AUTHENTICATED, function(event) {
+					console.log('Connection Authenticated');
 				});
-				channel.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
-					$('.channel').addClass('open').text('Yes');
-				}).on('move', function(event) {
+
+			channel
+				.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
+					console.log('Channel Subscribed');
+					channel.send('connect', ip);
+				})
+				.on('move', function (event) {
 					var player = players[event.data.sender];
+
 					if (player === undefined) {
+						console.log('Player '+players[event.data.sender]+' Joined the Game')
 						player = $('<div class="player" />').appendTo($('body'));
 						players[event.data.sender] = player;
 					}
+
 					player.css({
 						top: event.data.payload.top,
 						left: event.data.payload.left
 					});
-				}).on('disconnect', function(event) {
+				})
+				.on('disconnect', function (event) {
 					var player = players[event.data.sender];
 					if (player !== undefined) {
+						console.log('Player '+players[event.data.sender]+' Left the Game')
 						player.remove();
 						players[event.data.sender] = undefined;
 						delete(players[event.data.sender]);
 					}
 				});
 
-				$('body').mousemove(function(e) {
-					channel.send('move', {
-						top: e.pageY,
-						left: e.pageX
-					});
-				});
-			})();
+			$('body').mousemove(function(e) {
+				channel.send('move', {top: e.pageY, left: e.pageX});
+			});
+		})();
 		</script>
-		<dl>
-			<dt>Connected</dt>
-			<dd class="state connection">No</dd>
-			<dt>Identified</dt>
-			<dd class="state identification">No</dd>
-			<dt>Channel subscribed</dt>
-			<dd class="state channel">No</dd>
-		</dl>
+		<template id="player">
+			<div class="player">
+				<img src="{% static "pepe.png" %}">
+				<div class="caption"></div>
+			</div>
+		</template>
 	</body>
 
 </html>
