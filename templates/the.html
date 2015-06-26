@@ -10,6 +10,16 @@
 
 	<body>
 		<script type="text/javascript">
+		String.prototype.format = function() {
+		  var args = arguments;
+		  return this.replace(/{(\d+)}/g, function(match, number) {
+		        return typeof args[number] != 'undefined'
+		          ? args[number]
+		          : match
+		        ;
+		  });
+		};
+
 		(function() {
 			var players = {};
 			var transport = WebSocket;
@@ -17,7 +27,7 @@
 			var options = {authToken: '{{ OMNIBUS_AUTH_TOKEN }}'};
 			var connection = new Omnibus(transport, endpoint, options);
 			var channel = connection.openChannel('mousemoves');
-			var ip = '{{ request.session.ip }}'
+			var id = '{{ request.session.id }}'
 
 			connection
 				.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
@@ -30,20 +40,22 @@
 			channel
 				.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
 					console.log('Channel Subscribed');
-					channel.send('connect', ip);
+					channel.send('connect', id);
 				})
 				.on('move', function (event) {
 					var player = players[event.data.sender];
+					var playerid = event.data.payload.id
 
 					if (player === undefined) {
 						console.log('Player '+players[event.data.sender]+' Joined the Game')
-						player = $('<div class="player" />').appendTo($('body'));
+						var template = $('#player').html().format(playerid);
+						player = $(template).appendTo($('body'));
 						players[event.data.sender] = player;
 					}
 
 					player.css({
-						top: event.data.payload.top,
-						left: event.data.payload.left
+						top: event.data.payload.top+'%',
+						left: event.data.payload.left+'%'
 					});
 				})
 				.on('disconnect', function (event) {
@@ -57,14 +69,14 @@
 				});
 
 			$('body').mousemove(function(e) {
-				channel.send('move', {top: e.pageY, left: e.pageX});
+				channel.send('move', {top: e.pageY/$('body').height()*100, left: e.pageX/$('body').width()*100, 'id': id});
 			});
 		})();
 		</script>
 		<template id="player">
 			<div class="player">
 				<img src="{% static "pepe.png" %}">
-				<div class="caption"></div>
+				<div class="caption">{0}</div>
 			</div>
 		</template>
 	</body>
