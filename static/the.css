@@ -1,3 +1,7 @@
+html{
+	cursor: url('pepe.png'), auto;
+	-webkit-animation: increaseTemperature 3s linear infinite;
+}
 html, body {
 	height: 100%;
 	padding: 0;
@@ -5,16 +9,18 @@ html, body {
 }
 body {
 	font-family: Verdana, Arial, sans-serif;
-	background: #45484d;
+	background: -webkit-gradient(linear, left top, right top, color-stop(0, #f22), color-stop(.15, #f2f), color-stop(.3, #22f), color-stop(.45, #2ff), color-stop(.6, #2f2), color-stop(.75, #2f2), color-stop(.9, #ff2), color-stop(1, #f22));
+	-webkit-animation: animatedBackground 1s linear infinite;
+	background-size: 20%;
 }
 .player {
 	position: absolute;
-	width: 10px;
-	height: 10px;
-	background: #ff0000;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	-ms-border-radius: 5px;
-	-o-border-radius: 5px;
-	border-radius: 5px;
+}
+@-webkit-keyframes animatedBackground {
+    from { background-position: -150%;}
+    to { background-position: 250%;}
+}
+@-webkit-keyframes increaseTemperature {
+	from { -webkit-filter: hue-rotate(0deg);}
+	to { -webkit-filter: hue-rotate(360deg);}
 }

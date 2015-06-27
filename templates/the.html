@@ -47,7 +47,7 @@
 					var playerid = event.data.payload.id
 
 					if (player === undefined) {
-						console.log('Player '+players[event.data.sender]+' Joined the Game')
+						console.log('Player '+playerid+' Joined the Game')
 						var template = $('#player').html().format(playerid);
 						player = $(template).appendTo($('body'));
 						players[event.data.sender] = player;
@@ -61,7 +61,7 @@
 				.on('disconnect', function (event) {
 					var player = players[event.data.sender];
 					if (player !== undefined) {
-						console.log('Player '+players[event.data.sender]+' Left the Game')
+						console.log('Player Left the Game')
 						player.remove();
 						players[event.data.sender] = undefined;
 						delete(players[event.data.sender]);
