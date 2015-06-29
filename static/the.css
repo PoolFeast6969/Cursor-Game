@@ -1,5 +1,4 @@
 html{
-	cursor: url('pepe.png'), auto;
 	-webkit-animation: increaseTemperature 3s linear infinite;
 }
 html, body {

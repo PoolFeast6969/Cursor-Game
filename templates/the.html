@@ -40,7 +40,6 @@
 			channel
 				.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
 					console.log('Channel Subscribed');
-					channel.send('connect', id);
 				})
 				.on('move', function (event) {
 					var player = players[event.data.sender];
@@ -54,8 +53,8 @@
 					}
 
 					player.css({
-						top: event.data.payload.top+'%',
-						left: event.data.payload.left+'%'
+						top: event.data.payload.top,
+						left: event.data.payload.left
 					});
 				})
 				.on('disconnect', function (event) {
@@ -69,7 +68,7 @@
 				});
 
 			$('body').mousemove(function(e) {
-				channel.send('move', {top: e.pageY/$('body').height()*100, left: e.pageX/$('body').width()*100, 'id': id});
+				channel.send('move', {top: e.pageY/$('body').height()*100+'%', left: e.pageX/$('body').width()*100+'%', 'id': id});
 			});
 		})();
 		</script>
