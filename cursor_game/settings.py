@@ -136,4 +136,4 @@ LOGGING = {
     }
 }
 
-OMNIBUS_CONNECTION_FACTORY = 'cursor_game.connection.mousemove_connection_factory'
+OMNIBUS_CONNECTION_FACTORY = 'cursor_game.connection.player_connection'
