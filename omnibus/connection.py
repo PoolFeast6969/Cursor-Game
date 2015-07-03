@@ -168,8 +168,9 @@ class MessageConnection(object):
         else:
             result = False
 
-        # Tell the client wether subscription was successful or not.
+        # Tell the client weather subscription was successful or not.
         self.respond_command('subscribe', result, {'channel': channel})
+        return result
 
     def command_unsubscribe(self, args):
         """
@@ -189,3 +190,4 @@ class MessageConnection(object):
 
         # Tell the client wether the unsubscribe was successful or not.
         self.respond_command('unsubscribe', result, {'channel': channel})
+        return result
