@@ -57,7 +57,6 @@
 					var playerid = event.data.payload.id
 
 					if (player === undefined) {
-						console.log('Player '+playerid+' Joined the Game')
 						var template = $('#player').html().format(playerid);
 						player = $(template).appendTo($('body'));
 						players[event.data.sender] = player;
