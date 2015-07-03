@@ -130,7 +130,7 @@ LOGGING = {
     'loggers': {
         'omnibus': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': False,
         },
     }

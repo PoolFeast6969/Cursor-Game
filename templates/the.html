@@ -26,6 +26,11 @@
 			});
 		}
 
+		function chatlog(message) {
+			console.log(message);
+			$('.chatbox').append($('#chatline').html().format(message))
+		}
+
 		(function() {
 			var players = {};
 			var transport = WebSocket;
@@ -68,6 +73,10 @@
 				})
 				.on('disconnect', function (event) {
 					updategame(event.data.payload);
+				})
+				.on('chat', function (event) {
+					message = event.data.payload[null];
+					chatlog(message);
 				});
 
 			$('body').mousemove(function(e) {
@@ -75,12 +84,18 @@
 			});
 		})();
 		</script>
+
 		<template id="player">
 			<div class="player">
 				<img src="{% static "pepe.png" %}">
 				<div class="caption">{0}</div>
 			</div>
 		</template>
+		<template id="chatline">
+			<div class="chatline">{0}</div>
+		</template>
+
+		<div class="chatbox"></div>
 	</body>
 
 </html>
