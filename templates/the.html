@@ -5,7 +5,7 @@
 		{% load staticfiles %}
 		<link rel="stylesheet" href="{% static "the.css" %}" />
 		<script src="{% static "jquery-1.11.1.min.js" %}"></script>
-		<script src="{% static "omnibus.min.js" %}"></script>
+		<script src="{% static "omnibus.js" %}"></script>
 	</head>
 
 	<body>
@@ -19,6 +19,12 @@
 		        ;
 		  });
 		};
+
+		function updategame(game) {
+			window.game = $.map(game, function(value, index) {
+			    return [value];
+			});
+		}
 
 		(function() {
 			var players = {};
@@ -57,14 +63,11 @@
 						left: event.data.payload.left
 					});
 				})
+				.on('connect', function (event) {
+					updategame(event.data.payload);
+				})
 				.on('disconnect', function (event) {
-					var player = players[event.data.sender];
-					if (player !== undefined) {
-						console.log('Player Left the Game')
-						player.remove();
-						players[event.data.sender] = undefined;
-						delete(players[event.data.sender]);
-					}
+					updategame(event.data.payload);
 				});
 
 			$('body').mousemove(function(e) {

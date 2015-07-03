@@ -10,7 +10,7 @@ def player_connection(auth_class, pubsub):
             if result is not False:
                 GeneratedConnection.player['id'] = self.authenticator.get_identifier()
                 GeneratedConnection.player['username'] = self.request.host
-                game.append(GeneratedConnection.player)
+                game.append(GeneratedConnection.player.copy())
                 self.log('info', u'GAME: {0}'.format('added ' + GeneratedConnection.player['username'] + ' to game'))
                 self.pubsub.publish('mousemoves', 'connect', dict(enumerate(game)))
 
