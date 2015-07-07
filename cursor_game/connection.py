@@ -9,19 +9,22 @@ def gamelog(self, message):
 
 def player_connection(auth_class, pubsub):
     class GeneratedConnection(websocket_connection_factory(auth_class, pubsub)):
-        player = {'id':None,'username':None}
+        def __init__(self, *args, **kwargs):
+            self.player = {'id':None,'username':None}
+            super(GeneratedConnection, self).__init__(*args, **kwargs)
+
         def command_subscribe(self, args):
             result = super(GeneratedConnection, self).command_subscribe(args)
             if result is not False:
-                GeneratedConnection.player['id'] = self.authenticator.get_identifier()
-                GeneratedConnection.player['username'] = self.request.host
-                game.append(GeneratedConnection.player.copy())
-                gamelog(self, 'added ' + GeneratedConnection.player['username'] + ' to game')
+                self.player['id'] = self.authenticator.get_identifier()
+                self.player['username'] = self.request.host
+                game.append(self.player.copy())
+                gamelog(self, 'added ' + self.player['username'] + ' to the game')
                 self.pubsub.publish('mousemoves', 'connect', dict(enumerate(game)), sender='server')
 
         def close_connection(self):
-            game.remove(GeneratedConnection.player)
-            gamelog(self, 'removed ' + GeneratedConnection.player['username'] + ' from game')
+            game.remove(self.player)
+            gamelog(self, 'removed ' + self.player['username'] + ' from game')
             self.pubsub.publish('mousemoves', 'disconnect', dict(enumerate(game)), sender='server')
             return super(GeneratedConnection, self).close_connection()
 
