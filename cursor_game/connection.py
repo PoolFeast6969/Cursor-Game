@@ -20,12 +20,12 @@ def player_connection(auth_class, pubsub):
                 self.player['username'] = self.request.host
                 game.append(self.player.copy())
                 gamelog(self, 'added ' + self.player['username'] + ' to the game')
-                self.pubsub.publish('mousemoves', 'connect', dict(enumerate(game)), sender='server')
+                self.pubsub.publish('mousemoves', 'update', dict(enumerate(game)), sender='server')
 
         def close_connection(self):
             game.remove(self.player)
             gamelog(self, 'removed ' + self.player['username'] + ' from game')
-            self.pubsub.publish('mousemoves', 'disconnect', dict(enumerate(game)), sender='server')
+            self.pubsub.publish('mousemoves', 'update', dict(enumerate(game)), sender='server')
             return super(GeneratedConnection, self).close_connection()
 
     return GeneratedConnection
