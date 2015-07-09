@@ -1,5 +1,6 @@
 html{
 	-webkit-animation: increaseTemperature 3s linear infinite;
+	cursor: none;
 }
 html, body {
 	height: 100%;

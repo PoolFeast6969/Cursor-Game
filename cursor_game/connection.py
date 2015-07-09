@@ -5,7 +5,7 @@ game = []
 def gamelog(self, message):
     message = 'GAME: {0}'.format(message)
     self.log('info', message)
-    self.pubsub.publish('mousemoves', 'chat', {None:message}, sender='server')
+    self.pubsub.publish('mousemoves', 'chat', {'message':message}, sender='server')
 
 def player_connection(auth_class, pubsub):
     class GeneratedConnection(websocket_connection_factory(auth_class, pubsub)):

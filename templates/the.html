@@ -19,7 +19,6 @@
 				this.id = id;
 				this.username = username;
 				this.html = $($('#player').html().format(username)).appendTo($('body'));
-				console.log('player instance created with id '+id);
 			}
 			player.prototype.move = function(top, left) {
 				this.html.css({
@@ -27,37 +26,45 @@
 					left: left
 				});
 			};
-			function chatlog(message) {
-				console.log(message);
-				$('.chatbox').append($('#chatline').html().format(message));
-			}
+			game = {};
 			(function() {
 				var transport = WebSocket;
 				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
-				var options = {authToken: '{{ OMNIBUS_AUTH_TOKEN }}'};
+				var options = {
+					ignoreSender: false,
+					authToken: '{{ OMNIBUS_AUTH_TOKEN }}'
+				};
 				var connection = new Omnibus(transport, endpoint, options);
 				var channel = connection.openChannel('mousemoves');
-				var id = '{{ request.session.id }}'
-				connection.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
-					console.log('Connection Created');
-				}).on(Omnibus.events.CONNECTION_AUTHENTICATED, function(event) {
-					console.log('Connection Authenticated');
-				});
+				var clientid = '{{ request.session.id }}'
+
 				channel.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
 					console.log('Channel Subscribed');
 				}).on('move', function(event) {
-					playerid = event.data.sender;
-					window.playerinstance.move(event.data.payload.top, event.data.payload.left);
+					game['player'+event.data.sender].move(event.data.payload.top, event.data.payload.left);
 				}).on('update', function(event) {
-					game = $.map(event.data.payload, function(value, index) {
+					var newgame = $.map(event.data.payload, function(value, index) {
 						return [value];
 					});
-					$.each(game, function(index, value) {
-						window.playerinstance = new player(value.id, value.username);
+					console.log(newgame)
+					var serverids = $.map(newgame, function(value, index) {
+						return newgame[index]['id'];
+					});
+					var clientids = $.map(game, function(value, index) {
+						return game[index]['id'];
+					});
+					var add = $(serverids).not(clientids).get();
+					$.each(add, function(index, value) {
+						game['player'+value] = new player(value, newgame[index]['username']);
+					});
+					var remove = $(clientids).not(serverids).get();
+					$.each(remove, function(index, value) {
+						game['player'+value].html.remove();
+						delete game['player'+value];
 					});
 				}).on('chat', function(event) {
-					message = event.data.payload[null];
-					chatlog(message);
+					message = event.data.payload['message'];
+					$('.chatbox').append($('#chatline').html().format(message));
 				});
 				$('body').mousemove(function(e) {
 					channel.send('move', {
