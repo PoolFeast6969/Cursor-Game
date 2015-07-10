@@ -9,15 +9,11 @@
 
 	<body>
 		<script type="text/javascript">
-			String.prototype.format = function() {
-				var args = arguments;
-				return this.replace(/{(\d+)}/g, function(match, number) {
-					return typeof args[number] != 'undefined' ? args[number] : match;
-				});
-			};
-			function player(id, username) {
+			var game = {};
+			function player(id, username, picture) {
 				this.id = id;
 				this.username = username;
+				this.picture = picture;
 				this.html = $($('#player').html().format(username)).appendTo($('body'));
 			}
 			player.prototype.move = function(top, left) {
@@ -26,7 +22,12 @@
 					left: left
 				});
 			};
-			var game = {};
+			String.prototype.format = function() {
+				var args = arguments;
+				return this.replace(/{(\d+)}/g, function(match, number) {
+					return typeof args[number] != 'undefined' ? args[number] : match;
+				});
+			};
 			(function() {
 				var transport = WebSocket;
 				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
@@ -37,29 +38,49 @@
 				var connection = new Omnibus(transport, endpoint, options);
 				var channel = connection.openChannel('mousemoves');
 				var clientid = '{{ request.session.id }}'
-
 				channel.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
-					console.log('Channel Subscribed');
+					console.log('Connected to Server');
 				}).on('move', function(event) {
 					game[event.data.sender].move(event.data.payload.top, event.data.payload.left);
 				}).on('update', function(event) {
 					var servergame = event.data.payload;
 					var add = $(Object.keys(servergame)).not(Object.keys(game)).get();
 					$.each(add, function(index, id) {
-						game[id] = new player(id,  servergame[id]['username']);
+						game[id] = new player(id, servergame[id]['username'], servergame[id]['picture']);
 					});
 					var remove = $(Object.keys(game)).not(Object.keys(servergame)).get();
 					$.each(remove, function(index, id) {
+						game[id]['html'].remove();
+						game[id] = null;
 						delete game[id];
 					});
 				}).on('chat', function(event) {
-					message = event.data.payload['message'];
+					var sender
+					if (typeof game[event.data.sender] != "undefined") {
+						sender = game[event.data.sender]['username'];
+					} else {
+						sender = event.data.sender;
+					}
+					message = sender+': '+event.data.payload['message'];
 					$('.chatbox').append($('#chatline').html().format(message));
 				});
 				$('body').mousemove(function(e) {
 					channel.send('move', {
 						top: e.pageY / $('body').height() * 100 + '%',
 						left: e.pageX / $('body').width() * 100 + '%'
+					});
+				});
+				$( document ).ready(function() {
+					$('input').bind("enterKey",function() {
+						channel.send('chat', {
+							message: this.value
+						});
+						this.value = null;
+					});
+					$('input').keydown(function(e) {
+					    if(e.keyCode == 13) {
+					        $(this).trigger("enterKey");
+					    }
 					});
 				});
 			})();
@@ -73,7 +94,10 @@
 		<template id="chatline">
 			<div class="chatline">{0}</div>
 		</template>
-		<div class="chatbox"></div>
+		<div class="chat">
+			<div class="chatbox"></div>
+			<input class="chatinput" placeholder="tab to type"></input>
+		</div>
 	</body>
 
 </html>
