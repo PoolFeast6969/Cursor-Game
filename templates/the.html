@@ -26,7 +26,7 @@
 					left: left
 				});
 			};
-			game = {};
+			var game = {};
 			(function() {
 				var transport = WebSocket;
 				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
@@ -41,26 +41,16 @@
 				channel.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
 					console.log('Channel Subscribed');
 				}).on('move', function(event) {
-					game['player'+event.data.sender].move(event.data.payload.top, event.data.payload.left);
+					game[event.data.sender].move(event.data.payload.top, event.data.payload.left);
 				}).on('update', function(event) {
-					var newgame = $.map(event.data.payload, function(value, index) {
-						return [value];
+					var servergame = event.data.payload;
+					var add = $(Object.keys(servergame)).not(Object.keys(game)).get();
+					$.each(add, function(index, id) {
+						game[id] = new player(id,  servergame[id]['username']);
 					});
-					console.log(newgame)
-					var serverids = $.map(newgame, function(value, index) {
-						return newgame[index]['id'];
-					});
-					var clientids = $.map(game, function(value, index) {
-						return game[index]['id'];
-					});
-					var add = $(serverids).not(clientids).get();
-					$.each(add, function(index, value) {
-						game['player'+value] = new player(value, newgame[index]['username']);
-					});
-					var remove = $(clientids).not(serverids).get();
-					$.each(remove, function(index, value) {
-						game['player'+value].html.remove();
-						delete game['player'+value];
+					var remove = $(Object.keys(game)).not(Object.keys(servergame)).get();
+					$.each(remove, function(index, id) {
+						delete game[id];
 					});
 				}).on('chat', function(event) {
 					message = event.data.payload['message'];
@@ -73,7 +63,6 @@
 					});
 				});
 			})();
-
 		</script>
 		<template id="player">
 			<div class="player">
