@@ -55,11 +55,10 @@
 						delete game[id];
 					});
 				}).on('chat', function(event) {
-					var sender
 					if (typeof game[event.data.sender] != "undefined") {
-						sender = game[event.data.sender]['username'];
+						var sender = game[event.data.sender]['username'];
 					} else {
-						sender = event.data.sender;
+						var sender = event.data.sender;
 					}
 					message = sender+': '+event.data.payload['message'];
 					$('.chatbox').append($('#chatline').html().format(message));
