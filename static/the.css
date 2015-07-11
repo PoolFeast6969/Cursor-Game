@@ -10,7 +10,6 @@ html, body {
 body {
 	font-family: Verdana, Arial, sans-serif;
 	background: -webkit-gradient(linear, left top, right top, color-stop(0, #f22), color-stop(.15, #f2f), color-stop(.3, #22f), color-stop(.45, #2ff), color-stop(.6, #2f2), color-stop(.75, #2f2), color-stop(.9, #ff2), color-stop(1, #f22));
-	-webkit-animation: animatedBackground 1s linear infinite;
 	background-size: 20%;
 }
 .player {
@@ -22,10 +21,6 @@ body {
 	left: 0;
 	background: rgba(255, 0, 0, 0.5);
 	z-index: -1;
-}
-@-webkit-keyframes animatedBackground {
-    from { background-position: -150%;}
-    to { background-position: 250%;}
 }
 @-webkit-keyframes increaseTemperature {
 	from { -webkit-filter: hue-rotate(0deg);}
