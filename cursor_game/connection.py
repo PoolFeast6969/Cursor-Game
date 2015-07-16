@@ -15,7 +15,7 @@ def player_connection(auth_class, pubsub):
         def command_subscribe(self, args):
             result = super(GeneratedConnection, self).command_subscribe(args)
             if result is not False:
-                self.player['username'] = self.request.host
+                self.player['username'] = self.request.uri
                 self.player['picture'] = 'dunno'
                 self.id = self.authenticator.get_identifier()
                 game[self.id] = self.player.copy()
