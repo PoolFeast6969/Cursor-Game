@@ -15,10 +15,6 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '1mu50-=x6@*o5pd@9ym20ph&0#0_^74*_9b93ql0d%f1+roy3v'
 
@@ -66,6 +62,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'omnibus.context_processors.omnibus',
+                'cursor_game.context_processors.game',
             ],
         },
     },
@@ -75,7 +72,6 @@ WSGI_APPLICATION = 'cursor_game.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -86,7 +82,6 @@ DATABASES = {
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.8/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -99,8 +94,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.8/howto/static-files/
+# Static files
 
 STATIC_URL = '/static/'
 
@@ -138,3 +132,4 @@ LOGGING = {
 }
 
 OMNIBUS_CONNECTION_FACTORY = 'cursor_game.connection.player_connection'
+OMNIBUS_AUTHENTICATOR_FACTORY = 'cursor_game.authenticator.gameauthenticator_factory'

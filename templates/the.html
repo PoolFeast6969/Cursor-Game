@@ -33,11 +33,10 @@
 				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
 				var options = {
 					ignoreSender: false,
-					authToken: '{{ OMNIBUS_AUTH_TOKEN }}'
+					authToken: '{{ GAME_AUTH_TOKEN }}'
 				};
 				var connection = new Omnibus(transport, endpoint, options);
 				var channel = connection.openChannel('mousemoves');
-				var clientid = '{{ request.session.id }}'
 				channel.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
 					console.log('Connected to Server');
 				}).on('move', function(event) {
