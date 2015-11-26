@@ -4,7 +4,6 @@ import hmac
 from django.conf import settings
 from django.utils.encoding import force_bytes
 from importlib import import_module
-from django.conf import settings
 
 def gameauthenticator_factory():
     """
@@ -20,10 +19,10 @@ class GameAuthenticator(object):
         print 'Trying to authenticate'
         if ':' in args:
             try:
-                user_id, token = args.split(':')
+                identifier, token = args.split(':')
                 SessionStore = import_module(settings.SESSION_ENGINE).SessionStore
-                identifier = SessionStore.session_key
-                print str(identifier)+str(user_id)
+                user_id = SessionStore.session_key
+                print str(SessionStore.session_key)+str(user_id)
             except ValueError:
                 return None
 
