@@ -9,9 +9,55 @@
 
 	<body>
 		<script type="text/javascript">
+			$(document).ready(function () {
+					setupPointerLock();
+			});
+
+			var cursorX;
+			var cursorY;
+			$('body').mousemove(function(e) {
+			    cursorX = e.pageX;
+			    cursorY = e.pageY;
+			});
+
+			function setupPointerLock() {
+					document.addEventListener('pointerlockchange', changeCallback, false);
+					document.addEventListener('mozpointerlockchange', changeCallback, false);
+					document.addEventListener('webkitpointerlockchange', changeCallback, false);
+
+					$("body").click(function () {
+							var canvas = $("body").get()[0];
+							canvas.requestPointerLock = canvas.requestPointerLock ||
+											canvas.mozRequestPointerLock ||
+											canvas.webkitRequestPointerLock;
+							canvas.requestPointerLock();
+					});
+			};
+
+			function changeCallback(e) {
+					var canvas = $("body").get()[0];
+					if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
+							document.addEventListener("mousemove", moveCallback, false);
+					} else {
+							document.removeEventListener("mousemove", moveCallback, false);
+					}
+			};
+
+			var movement
+	    function moveCallback(e) {
+	        var canvas = $("body").get()[0];
+
+	        var movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+	        var movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+
+	        movement.x = cursorX + movementX;
+	        movement.y = cursorY + movementY;
+
+					console.log(entryCoordinates.x);
+					console.log(entryCoordinates.y);
+			};
 			var game = {};
-			function player(id, username, picture) {
-				this.id = id;
+			function player(username, picture) {
 				this.username = username;
 				this.picture = picture;
 				this.html = $($('#player').html().format(username)).appendTo($('body'));
@@ -37,7 +83,7 @@
 				};
 				var connection = new Omnibus(transport, endpoint, options);
 				var channel = connection.openChannel('mousemoves');
-				var clientid = '{{ request.session.id }}'
+				var clientid = '{{ request.session.userid }}'
 
 				connection
 					.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
@@ -55,9 +101,11 @@
 						})
 					.on('update', function(event) {
 						var servergame = event.data.payload;
+						console.log('Recieved Game Object: '+JSON.stringify(servergame));
+						console.log('Game Did Contain: '+JSON.stringify(game));
 						var add = $(Object.keys(servergame)).not(Object.keys(game)).get();
 						$.each(add, function(index, id) {
-							game[id] = new player(id, servergame[id]['username'], servergame[id]['picture']);
+							game[id] = new player(servergame[id]['username'], servergame[id]['picture']);
 						});
 						var remove = $(Object.keys(game)).not(Object.keys(servergame)).get();
 						$.each(remove, function(index, id) {
@@ -65,6 +113,7 @@
 							game[id] = null;
 							delete game[id];
 						});
+						console.log('Game Now Contains: '+JSON.stringify(game));
 					}).on('chat', function(event) {
 						if (typeof game[event.data.sender] != "undefined") {
 							var sender = game[event.data.sender]['username'];
@@ -75,7 +124,6 @@
 						$('.chatbox').append($('#chatline').html().format(message));
 					});
 				$('body').mousemove(function(e) {
-					console.log('mouse!');
 					channel.send('move', {
 						top: e.pageY / $('body').height() * 100 + '%',
 						left: e.pageX / $('body').width() * 100 + '%'
