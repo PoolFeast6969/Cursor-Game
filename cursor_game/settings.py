@@ -39,6 +39,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'omnibus',
     'cursor_game',
+    'lazysignup',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -50,6 +51,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+)
+
+AUTHENTICATION_BACKENDS = (
+  'django.contrib.auth.backends.ModelBackend',
+  'lazysignup.backends.LazySignupBackend',
 )
 
 ROOT_URLCONF = 'cursor_game.urls'
@@ -138,3 +144,4 @@ LOGGING = {
 }
 
 OMNIBUS_CONNECTION_FACTORY = 'cursor_game.connection.player_connection'
+OMNIBUS_AUTHENTICATOR_FACTORY = 'cursor_game.authenticator.userauthenticator_factory'
