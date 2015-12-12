@@ -5,151 +5,42 @@
 		<link rel="stylesheet" href="{% static "the.css" %}" />
 		<script src="{% static "jquery-1.11.1.min.js" %}"></script>
 		<script src="{% static "omnibus.js" %}"></script>
+		<script src="{% static "the.js" %}"></script>
 	</head>
 
 	<body>
-		<script type="text/javascript">
-			$(document).ready(function () {
-				setupPointerLock();
-				document.addEventListener("mousemove", unlockCallback, false);
-			});
-
+		<script>
 			var cursorX;
 			var cursorY;
 			var coordinates = {x:"None",y:"None"}
 			var cursoroffset = {x:"None",y:"None"}
 
-			function setupPointerLock() {
-				document.addEventListener('pointerlockchange', changeCallback, false);
-				document.addEventListener('mozpointerlockchange', changeCallback, false);
-				document.addEventListener('webkitpointerlockchange', changeCallback, false);
-
-					$("body").click(function(e) {
-						cursorX = e.pageX;
-						cursorY = e.pageY;
-						var canvas = $("body").get()[0];
-						canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
-						canvas.requestPointerLock();
-					});
-			};
-
-			function changeCallback(e) {
-				var canvas = $("body").get()[0];
-				if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
-					cursoroffset.x = cursorX;
-					cursoroffset.y = cursorY;
-					document.removeEventListener("mousemove", unlockCallback, false);
-					document.addEventListener("mousemove", lockCallback, false);
-				} else {
-					document.removeEventListener("mousemove", lockCallback, false);
-					document.addEventListener("mousemove", unlockCallback, false);
-				}
-			};
-
-		    function lockCallback(e) {
-				var movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
-				var movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
-				coordinates.x = cursoroffset.x + movementX;
-				coordinates.y = cursoroffset.y + movementY;
-				cursoroffset.x = coordinates.x;
-				cursoroffset.y = coordinates.y;
-			};
-
-			function unlockCallback(e) {
-				coordinates.x = e.pageX;
-				coordinates.y = e.pageY;
-			};
-
 			var game = {};
-			function player(username, picture) {
-				this.username = username;
-				this.picture = picture;
-				this.html = $($('#player').html().format(username)).appendTo($('body'));
-				// this.x = xord;
-				// this.y = yord
-			}
-			player.prototype.move = function(top, left) {
-				this.html.css({
-					top: top,
-					left: left
-				});
-			};
-			String.prototype.format = function() {
-				var args = arguments;
-				return this.replace(/{(\d+)}/g, function(match, number) {
-					return typeof args[number] != 'undefined' ? args[number] : match;
-				});
-			};
-			(function() {
-				var transport = WebSocket;
-				var endpoint = '{{ OMNIBUS_ENDPOINT }}';
-				var options = {
-					ignoreSender: false,
-					authToken: '{{ OMNIBUS_AUTH_TOKEN }}'
-				};
-				var connection = new Omnibus(transport, endpoint, options);
-				var channel = connection.openChannel('mousemoves');
-				var clientid = '{{ request.session.userid }}'
 
-				connection
-					.on(Omnibus.events.CONNECTION_CONNECTED, function(event) {
-						console.log('Connected');
-					})
-					.on(Omnibus.events.CONNECTION_AUTHENTICATED, function(event) {
-						console.log('Authenticated');
-					});
-				channel
-					.on(Omnibus.events.CHANNEL_SUBSCRIBED, function(event) {
-						console.log('Listening');
-					})
-					.on('move', function(event) {
-						game[event.data.sender].move(event.data.payload.top, event.data.payload.left);
-					})
-					.on('update', function(event) {
-						var servergame = event.data.payload;
-						console.log('Recieved Game Object: '+JSON.stringify(servergame));
-						console.log('Game Did Contain: '+JSON.stringify(game));
-						var add = $(Object.keys(servergame)).not(Object.keys(game)).get();
-						$.each(add, function(index, id) {
-							game[id] = new player(servergame[id]['username'], servergame[id]['picture']);
-						});
-						var remove = $(Object.keys(game)).not(Object.keys(servergame)).get();
-						$.each(remove, function(index, id) {
-							game[id]['html'].remove();
-							game[id] = null;
-							delete game[id];
-						});
-						console.log('Game Now Contains: '+JSON.stringify(game));
-					})
-					.on('chat', function(event) {
-						if (typeof game[event.data.sender] != "undefined") {
-							var sender = game[event.data.sender]['username'];
-						} else {
-							var sender = event.data.sender;
-						}
-						message = sender+': '+event.data.payload['message'];
-						$('.chatbox').append($('#chatline').html().format(message));
-					});
-				$('body').mousemove(function(e) {
-					channel.send('move', {
-						top: coordinates.y / $('body').height() * 100 + '%',
-						left: coordinates.x / $('body').width() * 100 + '%'
-					});
-				});
-				$( document ).ready(function() {
-					$('input').bind("enterKey",function() {
-						channel.send('chat', {
-							message: this.value
-						});
-						this.value = null;
-					});
-					$('input').keydown(function(e) {
-					    if(e.keyCode == 13) {
-					        $(this).trigger("enterKey");
-					    }
-					});
-				});
-			})();
+			function player(username, picture) {
+			  this.username = username;
+			  this.picture = picture;
+			  this.html = $($('#player').html().format(username)).appendTo($('body'));
+			}
+
+			player.prototype.move = function(top, left) {
+			  this.html.css({
+			    top: top,
+			    left: left
+			  });
+			};
+
+			String.prototype.format = function() {
+			  var args = arguments;
+			  return this.replace(/{(\d+)}/g, function(match, number) {
+			    return typeof args[number] != 'undefined' ? args[number] : match;
+			  });
+			};
+
+			$(document).ready(function () {
+				connect('{{ OMNIBUS_ENDPOINT }}','{{ OMNIBUS_AUTH_TOKEN }}');
+				setupPointerLock();
+			});
 		</script>
 		<template id="player">
 			<div class="player">
