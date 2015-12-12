@@ -10,57 +10,63 @@
 	<body>
 		<script type="text/javascript">
 			$(document).ready(function () {
-					setupPointerLock();
+				setupPointerLock();
+				document.addEventListener("mousemove", unlockCallback, false);
 			});
 
 			var cursorX;
 			var cursorY;
-			$('body').mousemove(function(e) {
-			    cursorX = e.pageX;
-			    cursorY = e.pageY;
-			});
+			var coordinates = {x:"None",y:"None"}
+			var cursoroffset = {x:"None",y:"None"}
 
 			function setupPointerLock() {
-					document.addEventListener('pointerlockchange', changeCallback, false);
-					document.addEventListener('mozpointerlockchange', changeCallback, false);
-					document.addEventListener('webkitpointerlockchange', changeCallback, false);
+				document.addEventListener('pointerlockchange', changeCallback, false);
+				document.addEventListener('mozpointerlockchange', changeCallback, false);
+				document.addEventListener('webkitpointerlockchange', changeCallback, false);
 
-					$("body").click(function () {
-							var canvas = $("body").get()[0];
-							canvas.requestPointerLock = canvas.requestPointerLock ||
-											canvas.mozRequestPointerLock ||
-											canvas.webkitRequestPointerLock;
-							canvas.requestPointerLock();
+					$("body").click(function(e) {
+						cursorX = e.pageX;
+						cursorY = e.pageY;
+						var canvas = $("body").get()[0];
+						canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
+						canvas.requestPointerLock();
 					});
 			};
 
 			function changeCallback(e) {
-					var canvas = $("body").get()[0];
-					if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
-							document.addEventListener("mousemove", moveCallback, false);
-					} else {
-							document.removeEventListener("mousemove", moveCallback, false);
-					}
+				var canvas = $("body").get()[0];
+				if (document.pointerLockElement === canvas || document.mozPointerLockElement === canvas || document.webkitPointerLockElement === canvas) {
+					cursoroffset.x = cursorX;
+					cursoroffset.y = cursorY;
+					document.removeEventListener("mousemove", unlockCallback, false);
+					document.addEventListener("mousemove", lockCallback, false);
+				} else {
+					document.removeEventListener("mousemove", lockCallback, false);
+					document.addEventListener("mousemove", unlockCallback, false);
+				}
 			};
 
-			var movement
-	    function moveCallback(e) {
-	        var canvas = $("body").get()[0];
-
-	        var movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
-	        var movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
-
-	        movement.x = cursorX + movementX;
-	        movement.y = cursorY + movementY;
-
-					console.log(entryCoordinates.x);
-					console.log(entryCoordinates.y);
+		    function lockCallback(e) {
+				var movementX = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+				var movementY = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+				coordinates.x = cursoroffset.x + movementX;
+				coordinates.y = cursoroffset.y + movementY;
+				cursoroffset.x = coordinates.x;
+				cursoroffset.y = coordinates.y;
 			};
+
+			function unlockCallback(e) {
+				coordinates.x = e.pageX;
+				coordinates.y = e.pageY;
+			};
+
 			var game = {};
 			function player(username, picture) {
 				this.username = username;
 				this.picture = picture;
 				this.html = $($('#player').html().format(username)).appendTo($('body'));
+				// this.x = xord;
+				// this.y = yord
 			}
 			player.prototype.move = function(top, left) {
 				this.html.css({
@@ -98,7 +104,7 @@
 					})
 					.on('move', function(event) {
 						game[event.data.sender].move(event.data.payload.top, event.data.payload.left);
-						})
+					})
 					.on('update', function(event) {
 						var servergame = event.data.payload;
 						console.log('Recieved Game Object: '+JSON.stringify(servergame));
@@ -114,7 +120,8 @@
 							delete game[id];
 						});
 						console.log('Game Now Contains: '+JSON.stringify(game));
-					}).on('chat', function(event) {
+					})
+					.on('chat', function(event) {
 						if (typeof game[event.data.sender] != "undefined") {
 							var sender = game[event.data.sender]['username'];
 						} else {
@@ -125,8 +132,8 @@
 					});
 				$('body').mousemove(function(e) {
 					channel.send('move', {
-						top: e.pageY / $('body').height() * 100 + '%',
-						left: e.pageX / $('body').width() * 100 + '%'
+						top: coordinates.y / $('body').height() * 100 + '%',
+						left: coordinates.x / $('body').width() * 100 + '%'
 					});
 				});
 				$( document ).ready(function() {
